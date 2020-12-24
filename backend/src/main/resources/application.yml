@@ -1,0 +1,21 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /orange
+
+spring:
+  application:
+    name: orange
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  jmx:
+    enabled: false
+  datasource:
+    url: jdbc:mysql://localhost:3309/orange?createDatabaseIfNotExist=true&useTimezone=true&serverTimezone=UTC
+    username: root
+    password: root
