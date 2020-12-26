@@ -1,140 +1,151 @@
 package com.devblack.backend.controller;
 
-import com.devblack.backend.dto.PessoaVO;
-import com.devblack.backend.exception.ValidationException;
+import com.devblack.backend.service.PessoaService;
+import org.json.JSONObject;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
-import java.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-
+@RunWith(SpringRunner.class)
+@WebMvcTest(PessoaController.class)
+@AutoConfigureMockMvc
+@TestPropertySource(locations="classpath:test.yml")
 public class PessoaControllerTest {
 
+    @Autowired private MockMvc mockMvc;
 
-    @InjectMocks
-    private PessoaController pessoaController;
+    @MockBean private PessoaService pessoaService;
 
-    @Before
-    public void setup(){
-        MockitoAnnotations.initMocks(this);
-    }
+    private  final String NOME = "Fulano";
+    private  final String EMAIL = "fulano@gmail.com";
+    private  final String DTNASCIMENTO = "2000-12-15";
+    private  final String DTNASCIMENTO_MAIOR = "2150-12-15";
+    private  final String CPF = "373.111.220-58";
+    private  final String POST_URL = "/pessoa";
 
     @Test
     public void naoDeveSalvarPessoaSemCPF(){
 
         try{
-            PessoaVO pessoa = new PessoaVO();
-            pessoa.setNome("Fulano");
-            pessoa.setEmail("Fulano@gmail.com");
-            pessoa.setDtNascimento(LocalDate.of(2000,12,25));
+            JSONObject pessoaJson = new JSONObject();
+            pessoaJson.put("nome",NOME);
+            pessoaJson.put("email",EMAIL);
+            pessoaJson.put("dtNascimento", DTNASCIMENTO);
 
-            pessoaController.salvar(pessoa);
-            Assert.fail("não era para salvar");
+
+            RequestBuilder requestBuilder = MockMvcRequestBuilders.post(POST_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(pessoaJson.toString());
+
+            MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+            MockHttpServletResponse response = result.getResponse();
+            JSONObject mensagem = new JSONObject(response.getContentAsString());
+            Assert.assertEquals("cannot save cpf null",mensagem.get("mensagem"));
+
         }catch (Exception e){
-            Assert.assertEquals("cannot save cpf null", e.getMessage());
+            Assert.fail(e.getMessage());
         }
     }
 
     @Test
-    public void naoDeveSalvarPessoaSemNome(){
+    public void naoDeveSalvarPessoaSemNome() {
         try{
-            PessoaVO pessoa = new PessoaVO();
+            JSONObject pessoaJson = new JSONObject();
+            pessoaJson.put("email",EMAIL);
+            pessoaJson.put("dtNascimento", DTNASCIMENTO);
+            pessoaJson.put("cpf",CPF);
 
-            pessoa.setEmail("Fulano@gmail.com");
-            //cpf gerado automaticamente em (https://www.4devs.com.br/gerador_de_cpf)
-            pessoa.setCpf("373.111.220-58");
-            pessoa.setDtNascimento(LocalDate.of(2000,12,25));
+            RequestBuilder requestBuilder = MockMvcRequestBuilders.post(POST_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(pessoaJson.toString());
 
-            pessoaController.salvar(pessoa);
-            Assert.fail("não era para salvar");
-        }catch (ValidationException e){
-            Assert.assertEquals("cannot save nome null", e.getMessage());
+            MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+            MockHttpServletResponse response = result.getResponse();
+            JSONObject mensagem = new JSONObject(response.getContentAsString());
+            Assert.assertEquals("cannot save nome null",mensagem.get("mensagem"));
+
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
         }
     }
 
     @Test
     public void naoDeveSalvarPessoaSemEmail(){
         try{
-            PessoaVO pessoa = new PessoaVO();
-            pessoa.setNome("Fulano");
-            pessoa.setCpf("373.111.220-58");
-            pessoa.setDtNascimento(LocalDate.of(2000,12,25));
+            JSONObject pessoaJson = new JSONObject();
+            pessoaJson.put("nome",NOME);
+            pessoaJson.put("dtNascimento", DTNASCIMENTO);
+            pessoaJson.put("cpf",CPF);
 
-            pessoaController.salvar(pessoa);
-            Assert.fail("não era para salvar");
+            RequestBuilder requestBuilder = MockMvcRequestBuilders.post(POST_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(pessoaJson.toString());
+
+            MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+            MockHttpServletResponse response = result.getResponse();
+            JSONObject mensagem = new JSONObject(response.getContentAsString());
+            Assert.assertEquals("cannot save email null",mensagem.get("mensagem"));
+
         }catch (Exception e){
-            Assert.assertEquals("cannot save email null", e.getMessage());
+            Assert.fail(e.getMessage());
         }
     }
 
     @Test
     public void naoDeveSalvarPessoaSemDataDeNascimento(){
         try{
-            PessoaVO pessoa = new PessoaVO();
-            pessoa.setNome("Fulano");
-            pessoa.setEmail("Fulano@gmail.com");
-            pessoa.setCpf("373.111.220-58");
-
-            pessoaController.salvar(pessoa);
-            Assert.fail("não era para salvar");
-        }catch (ValidationException e){
-            Assert.assertEquals("cannot save dtNascimento null", e.getMessage());
-        }
-    }
+            JSONObject pessoaJson = new JSONObject();
+            pessoaJson.put("nome",NOME);
+            pessoaJson.put("email",EMAIL);
+            pessoaJson.put("cpf",CPF);
 
 
+            RequestBuilder requestBuilder = MockMvcRequestBuilders.post(POST_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(pessoaJson.toString());
 
-    @Test
-    public void naoDeveSalvarPessoaComCPFDuplicado()
-    {
-        try{
-            PessoaVO pessoa = new PessoaVO();
-            pessoa.setNome("Fulano");
-            pessoa.setEmail("Fulano@gmail.com");
-            pessoa.setCpf("373.111.220-58");
-            pessoa.setDtNascimento(LocalDate.of(2000,12,25));
-            pessoaController.salvar(pessoa);
-            pessoaController.salvar(pessoa);
-            Assert.fail("não era para salvar");
-        }catch (ValidationException e){
-            Assert.assertEquals("cannot save duplicate cpf", e.getMessage());
-        }
-    }
+            MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+            MockHttpServletResponse response = result.getResponse();
+            JSONObject mensagem = new JSONObject(response.getContentAsString());
+            Assert.assertEquals("cannot save dtNascimento null",mensagem.get("mensagem"));
 
-    @Test
-    public void naoDeveSalvarPessoaComEmailDuplicado()
-    {
-        try{
-            PessoaVO pessoa = new PessoaVO();
-            pessoa.setNome("Fulano");
-            pessoa.setEmail("Fulano@gmail.com");
-            pessoa.setCpf("373.111.220-58");
-            pessoa.setDtNascimento(LocalDate.of(2000,12,25));
-            pessoaController.salvar(pessoa);
-            pessoaController.salvar(pessoa);
-            Assert.fail("não era para salvar");
-        }catch (ValidationException e){
-            Assert.assertEquals("cannot save duplicate email", e.getMessage());
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
         }
     }
 
     @Test
     public void naoDeveSalvarPessoaComDtDeNascimentoMaiorQueDataAtual(){
         try{
-            PessoaVO pessoa = new PessoaVO();
-            pessoa.setNome("Fulano");
-            pessoa.setEmail("Fulano@gmail.com");
-            pessoa.setCpf("373.111.220-58");
-            pessoa.setDtNascimento(LocalDate.of(2090,12,25));
-            pessoaController.salvar(pessoa);
-            pessoaController.salvar(pessoa);
-            Assert.fail("não era para salvar");
-        }catch (ValidationException e){
-            Assert.assertEquals("cannot save duplicate email", e.getMessage());
+            JSONObject pessoaJson = new JSONObject();
+            pessoaJson.put("nome",NOME);
+            pessoaJson.put("email",EMAIL);
+            pessoaJson.put("dtNascimento", DTNASCIMENTO_MAIOR);
+            pessoaJson.put("cpf",CPF);
+
+            RequestBuilder requestBuilder = MockMvcRequestBuilders.post(POST_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(pessoaJson.toString());
+
+            MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+            MockHttpServletResponse response = result.getResponse();
+            JSONObject mensagem = new JSONObject(response.getContentAsString());
+            Assert.assertEquals("cannot save dtNascimento greater than the current date",mensagem.get("mensagem"));
+
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
         }
     }
 }

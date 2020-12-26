@@ -5,8 +5,10 @@ import org.springframework.data.jpa.domain.Specification;
 
 public final class PessoaSpecification {
 
-    private PessoaSpecification(){
+    private PessoaSpecification(){ }
 
+    public static Specification<Pessoa> idEquals(Long id){
+        return ((root, query, cb) -> cb.equal(root.get("id"), id));
     }
 
     public static Specification<Pessoa> cpfEquals(String cpf){
@@ -16,6 +18,4 @@ public final class PessoaSpecification {
     public static Specification<Pessoa> emailEquals(String email){
         return ((root, query, cb) -> cb.equal(root.get("email"), email));
     }
-
 }
-

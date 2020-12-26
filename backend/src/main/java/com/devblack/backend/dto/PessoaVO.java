@@ -4,10 +4,8 @@ import com.devblack.backend.model.Pessoa;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
-import org.hibernate.validator.constraints.br.CPF;
 import org.modelmapper.ModelMapper;
-
-import javax.validation.constraints.Email;
+import org.springframework.format.annotation.DateTimeFormat;
 import java.io.Serializable;
 import java.time.LocalDate;
 
@@ -28,6 +26,7 @@ public class PessoaVO implements Serializable {
     private String email;
     @JsonProperty("cpf")
     private String cpf;
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
     @JsonProperty("dtNascimento")
     private LocalDate dtNascimento;
 

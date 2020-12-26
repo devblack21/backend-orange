@@ -8,8 +8,6 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -26,8 +24,10 @@ public class Pessoa implements Serializable {
     private Long id;
     @Column(name = "nome", nullable = false)
     private String nome;
+    @Email
     @Column(name = "email", nullable = false, unique = true)
     private String email;
+    @CPF
     @Column(name = "cpf", nullable = false, unique = true, length = 14)
     private String cpf;
     @Column(name = "dtNascimento", nullable = false)

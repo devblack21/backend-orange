@@ -1,7 +1,6 @@
 package com.devblack.backend.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 
 public class ControllerException extends RuntimeException {
     private final HttpStatus status;

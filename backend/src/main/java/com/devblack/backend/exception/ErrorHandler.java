@@ -1,8 +1,5 @@
 package com.devblack.backend.exception;
 
-import static java.util.stream.Collectors.*;
-import static org.springframework.http.ResponseEntity.*;
-import java.util.Map;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -11,6 +8,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.Map;
+import static java.util.stream.Collectors.*;
+import static org.springframework.http.ResponseEntity.badRequest;
+import static org.springframework.http.ResponseEntity.status;
 
 @ControllerAdvice(annotations = RestController.class)
 public class ErrorHandler {

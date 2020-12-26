@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import static org.springframework.data.jpa.domain.Specification.where;
-import static com.devblack.backend.specification.PessoaSpecification.*;
 import static com.devblack.backend.exception.ControllerException.conflict;
 import static com.devblack.backend.exception.ControllerException.notFound;
+import static com.devblack.backend.specification.PessoaSpecification.*;
+import static org.springframework.data.jpa.domain.Specification.not;
+import static org.springframework.data.jpa.domain.Specification.where;
 
 @Service
 public class PessoaService {
@@ -27,9 +29,10 @@ public class PessoaService {
         return PessoaVO.convert(pessoa);
     }
 
-    private boolean isCpfExists(String cpf){
+    private boolean isCpfExists(String cpf, Long id){
+        id = (id==null)? 0 : id;
         AtomicBoolean isExists = new AtomicBoolean(false);
-        this.pessoaRepository.findOne(where(cpfEquals(cpf)))
+        this.pessoaRepository.findOne(where(cpfEquals(cpf)).and(not(idEquals(id))))
                 .ifPresent(it ->
                 {
                     isExists.set(true);
@@ -38,9 +41,10 @@ public class PessoaService {
         return isExists.get();
     }
 
-    private boolean isEmailExists(String email){
+    private boolean isEmailExists(String email,Long id){
+        id = (id==null)? 0 : id;
         AtomicBoolean isExists = new AtomicBoolean(false);
-        this.pessoaRepository.findOne(where(emailEquals(email)))
+        this.pessoaRepository.findOne(where(emailEquals(email).and(not(idEquals(id)))))
                 .ifPresent(it ->
                 {
                     isExists.set(true);
@@ -50,20 +54,20 @@ public class PessoaService {
     }
 
     private void validaDuplicidade(PessoaVO pessoaVO){
-        if(isCpfExists(pessoaVO.getCpf())){
+        if(isCpfExists(pessoaVO.getCpf(),pessoaVO.getId())){
             throw conflict("Já existe uma pessoa cadastrada com o CPF informado");
         }
-        if(isEmailExists(pessoaVO.getEmail())){
+        if(isEmailExists(pessoaVO.getEmail(),pessoaVO.getId())){
             throw conflict("Já existe uma pessoa cadastrada com o Email informado");
         }
     }
 
-    public PessoaVO salvar(PessoaVO pessoaVO){
+    public PessoaVO salvar(PessoaVO pessoaVO) throws Exception{
         validaDuplicidade(pessoaVO);;
         return PessoaVO.convert(this.pessoaRepository.save(Pessoa.convert(pessoaVO)));
     }
 
-    public PessoaVO alterar(PessoaVO pessoaVO){
+    public PessoaVO alterar(PessoaVO pessoaVO) throws Exception{
         validaDuplicidade(pessoaVO);
         return PessoaVO.convert(this.pessoaRepository.save(Pessoa.convert(pessoaVO)));
     }
@@ -80,13 +84,15 @@ public class PessoaService {
         if (id < 0){
             throw conflict("O ID informado é invalido.");
         }
-
-        return PessoaVO.convert(this.pessoaRepository.findById(id).get());
+        AtomicReference<PessoaVO> pessoaVO = new AtomicReference<PessoaVO>();
+        this.pessoaRepository.findById(id).ifPresent(it ->{
+                    pessoaVO.set(PessoaVO.convert(it));
+        });
+        return pessoaVO.get();
     }
 
     public List<PessoaVO> buscarTodos(){
         return this.pessoaRepository.findAll().stream().map(this::convertPessoaToPessoaVO).collect(Collectors.toList());
     }
-
 
 }
